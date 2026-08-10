@@ -6,8 +6,9 @@
     <title>PulseRescue AI - Batik Sleman Edition</title>
 
     <!-- PWA Config -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0284c7">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#e11d48">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1097,9 +1098,13 @@
 
     <!-- Registrasi Service Worker PWA -->
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW Registered:', reg.scope))
+            .catch(err => console.error('SW Fail:', err));
+        });
+      }
     </script>
 </body>
 </html>

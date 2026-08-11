@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -17,6 +18,7 @@ app = FastAPI(
     version="2.0.0"
 )
 
+# CORS dipasang agar frontend (Netlify/Vercel/Web) dapat mengakses API secara bebas
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -33,7 +35,7 @@ class SignalInput(BaseModel):
     signal: List[float] = Field(
         ...,
         description="Array 100 nilai fluktuasi sinyal PPG.",
-        example=[0.12, 0.45, 0.88, 0.23, -0.15] * 20
+        json_schema_extra={"example": [0.12, 0.45, 0.88, 0.23, -0.15] * 20}
     )
     latitude: float = Field(default=-7.7956, description="Koordinat Latitude Pengguna")
     longitude: float = Field(default=110.3695, description="Koordinat Longitude Pengguna")
@@ -181,7 +183,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     c = 2 * asin(sqrt(a))
     return R * c
 
-# Inisialisasi ONNX Session
+# Inisialisasi ONNX Session (jika ada file tinyformer.onnx)
 MODEL_PATH = "tinyformer.onnx"
 try:
     session = ort.InferenceSession(MODEL_PATH)
@@ -194,8 +196,16 @@ def softmax(x):
     return e_x / e_x.sum(axis=0)
 
 # ==============================================================================
-# 5. ENDPOINTS
+# 5. ENDPOINTS & HEALTH CHECK
 # ==============================================================================
+
+@app.get("/")
+def read_root():
+    return {
+        "service": "PulseRescue AI Engine API",
+        "status": "Online",
+        "version": "2.0.0"
+    }
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict(data: SignalInput):
@@ -286,4 +296,5 @@ def get_nearest_hospital(lat: float, lng: float):
     }
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

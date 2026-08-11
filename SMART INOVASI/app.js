@@ -406,21 +406,21 @@ function switchTab(tabId, el) {
     }
 }
 
-// --- CANVAS PPG WAVEFORM ---
+// --- CANVAS ECG WAVEFORM ---
 function resizeCanvas() {
     if (!canvas || !canvas.parentElement) return;
     canvas.width = canvas.parentElement.clientWidth;
     canvas.height = canvas.parentElement.clientHeight;
 }
 
-function getPPGPoint(t) {
+function getECGPoint(t) {
     const cycle = t % 60;
     if (isAnomalyWave) return (Math.random() * 28) - 14;
     if (cycle < 15) return Math.sin((cycle / 15) * Math.PI) * 18;
     return 0;
 }
 
-function drawPPG() {
+function drawECG() {
     if (!ctx || !canvas) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const midY = canvas.height * 0.52;

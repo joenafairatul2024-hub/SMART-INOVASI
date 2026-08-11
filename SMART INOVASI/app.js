@@ -2,8 +2,8 @@
 // PULSERESCUE AI - APP LOGIC (app.js)
 // ==========================================
 
-// --- KONFIGURASI BACKEND API 
-const API_BASE_URL = "https://web-production-bd1d5.up.railway.app"; 
+// --- KONFIGURASI BACKEND API (Ganti dengan URL HTTPS Cloud Server Anda) ---
+const API_BASE_URL = "https://pulserescue-api.onrender.com"; // Contoh URL dari Render.com
 
 // --- KONFIGURASI & STATE GLOBAL PASIEN ---
 let REGISTERED_PATIENT = { 

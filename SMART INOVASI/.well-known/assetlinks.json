@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.smart_inovasi.twa",
+      "sha256_cert_fingerprints": [
+        "87:6F:AC:F3:23:00:A5:18:7B:FB:72:4B:30:A7:1D:CB:C4:F4:42:69:7F:AF:C4:7E:C0:25:52:6F:5E:24:44:15"
+      ]
+    }
+  }
+]

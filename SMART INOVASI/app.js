@@ -51,7 +51,7 @@ const MASTER_HOSPITALS = [
     { id: "rsud_sleman", name: "RSUD Sleman", type: "RS Pemerintah", desc: "RSUD Kab. Sleman", lat: -7.687120, lng: 110.341250, phone: "(0274) 868437" }
 ];
 
-// State Canvas PPG Waveform
+// State Canvas ECG Waveform
 let canvas, ctx;
 let points = [];
 let step = 0;

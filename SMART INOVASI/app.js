@@ -2,8 +2,8 @@
 // PULSERESCUE AI - APP LOGIC (app.js)
 // ==========================================
 
-// --- KONFIGURASI BACKEND API (Ganti dengan URL HTTPS Cloud Server Anda) ---
-const API_BASE_URL = "https://pulserescue-api.onrender.com"; // Contoh URL dari Render.com
+// --- KONFIGURASI BACKEND API RAILWAY ---
+const API_BASE_URL = "https://web-production-bd1d5.up.railway.app";
 
 // --- KONFIGURASI & STATE GLOBAL PASIEN ---
 let REGISTERED_PATIENT = { 
@@ -25,7 +25,7 @@ let REGISTERED_PATIENT = {
 const R_MAX_KM = 50;            
 const TAU_DISPATCH_MIN = 2;     
 
-// Koordinat Awal Default (Fallback Sleman)
+// Koordinat Awal Default (Sleman, DI Yogyakarta)
 let userLat = -7.7715; 
 let userLng = 110.3395;
 
@@ -65,12 +65,10 @@ function goToRegister() {
     const register = document.getElementById('registerScreen');
     if (splash) splash.classList.add('hidden');
     if (register) register.classList.remove('hidden');
-    
     goToStep(1);
 }
 
 function nextRegStep() {
-    // Validasi input wajib di Step 1
     const nama = document.getElementById('reg_nama')?.value.trim();
     const nik = document.getElementById('reg_nik')?.value.trim();
     const tglLahir = document.getElementById('reg_tgl_lahir')?.value;
@@ -83,7 +81,6 @@ function nextRegStep() {
         alert("Mohon isi seluruh bidang bertanda bintang (*) di Step 1 terlebih dahulu.");
         return;
     }
-
     goToStep(2);
 }
 
@@ -188,7 +185,6 @@ function updateUserInterfaceWithPatientData() {
     if (userAvatarEl && REGISTERED_PATIENT.name) userAvatarEl.innerText = REGISTERED_PATIENT.name.charAt(0).toUpperCase();
     if (syncNikEl) syncNikEl.innerText = REGISTERED_PATIENT.nik;
 
-    // Update Tab Medis
     const medNama = document.getElementById('med-nama');
     const medNik = document.getElementById('med-nik');
     const medTtl = document.getElementById('med-ttl');
@@ -233,7 +229,7 @@ function renderAnalisisTab(data = {}) {
 
     const riskPercent = data.risk_percent || data.risk_score || data.cardiac_risk_index || 1.74;
     const predCode = data.prediction_code || 0; // 0: Normal, 1: Waspada, 2: Kritis
-    const latency = data.latency || "11.4 ms";
+    const latency = data.latency || "8.2 ms";
     const hrvVar = data.hrv_var || data.lstmHrv || "1.28 ms²";
 
     let konsensusStatus = "NORMAL (99.2%)";
@@ -293,10 +289,10 @@ function renderAnalisisTab(data = {}) {
                 <span class="card-title" style="display:flex; align-items:center; gap:6px;">
                     <i class="fa-solid fa-microchip" style="color:var(--brand-primary)"></i> EDGE AI ENGINE PERFORMANCE
                 </span>
-                <span class="badge-engine-blue">TF.js WebGL Engine</span>
+                <span class="badge-engine-blue">Railway Cloud FastAPI</span>
             </div>
             <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
-                Pemrosesan model AI dilakukan langsung di memori perangkat melalui runtime TensorFlow.js lokal tanpa koneksi server.
+                Pemrosesan inferensi AI diproses secara terintegrasi via REST API Engine di server Railway.
             </p>
             <div class="inner-box-2col">
                 <div class="inner-stat-box">
@@ -304,8 +300,8 @@ function renderAnalisisTab(data = {}) {
                     <h4>${latency}</h4>
                 </div>
                 <div class="inner-stat-box">
-                    <p>Engine Type</p>
-                    <h4>TensorFlow.js</h4>
+                    <p>Engine Runtime</p>
+                    <h4>PyTorch CPU</h4>
                 </div>
             </div>
         </div>
@@ -318,10 +314,10 @@ function renderAnalisisTab(data = {}) {
                 <span style="font-size: 0.72rem; font-weight: 800; color: ${cnnBadgeColor};">${cnnBadgeText}</span>
             </div>
             <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
-                Mengevaluasi morfologi gelombang PPG secara kontinu menggunakan layer Conv1D untuk mendeteksi disritmia mendadak.
+                Mengevaluasi morfologi gelombang ECG secara kontinu menggunakan layer Conv1D untuk mendeteksi disritmia mendadak.
             </p>
             <div class="inner-box-orange">
-                <span>TF.js Layer: Conv1D (4 Filters)</span>
+                <span>Conv1D Feature Extractor</span>
                 <span>Risk: ${riskPercent.toFixed(2)}%</span>
             </div>
         </div>
@@ -334,7 +330,7 @@ function renderAnalisisTab(data = {}) {
                 <span style="font-size: 0.72rem; font-weight: 800; color: var(--brand-primary);">Window: 10s</span>
             </div>
             <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
-                Manganalisis variabilitas interval R-R temporal jangka pendek untuk memprediksi kecenderungan henti jantung secara real-time.
+                Menganalisis variabilitas interval R-R temporal jangka pendek untuk memprediksi kecenderungan henti jantung secara real-time.
             </p>
             <div class="inner-box-blue">
                 <span>Recurrent Units: 64 LSTM</span>
@@ -366,12 +362,12 @@ function updateHomeMetrics(riskPercent, morphologyScore) {
 
 // --- INISIALISASI UTAMA ---
 document.addEventListener("DOMContentLoaded", () => {
-    canvas = document.getElementById('ppgCanvas');
+    canvas = document.getElementById('ecgCanvas');
     if (canvas) {
         ctx = canvas.getContext('2d');
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
-        drawPPG();
+        drawECG();
     }
 
     updateClock();
@@ -424,7 +420,7 @@ function drawECG() {
     if (!ctx || !canvas) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const midY = canvas.height * 0.52;
-    points.push({ y: midY - getPPGPoint(step) });
+    points.push({ y: midY - getECGPoint(step) });
     if (points.length > canvas.width / 2) points.shift();
 
     ctx.beginPath();
@@ -436,7 +432,7 @@ function drawECG() {
     }
     ctx.stroke();
     step++;
-    requestAnimationFrame(drawPPG);
+    requestAnimationFrame(drawECG);
 }
 
 // --- GPS REALTIME ---
@@ -654,7 +650,7 @@ async function fetchAIPrediction() {
         if (bpmEl) bpmEl.innerText = bpm;
         if (spo2El) spo2El.innerText = spo2 + "%";
         if (lstmEl) {
-            lstmEl.innerText = data.ai_status || "TERHUBUNG";
+            lstmEl.innerText = data.ai_status || "TERHUBUNG (RAILWAY)";
             lstmEl.style.color = "var(--success)";
         }
 
@@ -729,8 +725,8 @@ function removeEmergencyRoute() {
 function panggilAmbulans() { 
     const targetHospital = selectedHospital || currentNearestHospital;
     if (targetHospital) {
-        alert(` PANGGILAN SOS DIKIRIM KE AMBULANS ${targetHospital.name.toUpperCase()}!\nPasien: ${REGISTERED_PATIENT.name}\nJarak: ${targetHospital.distance_km} km\nETA: ${targetHospital.eta_min} Menit\nKontak Darurat Pasien: ${REGISTERED_PATIENT.kontakDarurat.hp}`);
+        alert(`PANGGILAN SOS DIKIRIM KE AMBULANS ${targetHospital.name.toUpperCase()}!\nPasien: ${REGISTERED_PATIENT.name}\nJarak: ${targetHospital.distance_km} km\nETA: ${targetHospital.eta_min} Menit\nKontak Darurat Pasien: ${REGISTERED_PATIENT.kontakDarurat.hp}`);
     } else {
-        alert(" PANGGILAN SOS DIKIRIM KE AMBULANS TERDEKAT!"); 
+        alert("PANGGILAN SOS DIKIRIM KE AMBULANS TERDEKAT!"); 
     }
 }

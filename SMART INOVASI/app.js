@@ -2,6 +2,9 @@
 // PULSERESCUE AI - APP LOGIC (app.js)
 // ==========================================
 
+// --- KONFIGURASI BACKEND API (Ganti dengan URL HTTPS Cloud Server Anda) ---
+const API_BASE_URL = "https://pulserescue-api.onrender.com"; // Contoh URL dari Render.com
+
 // --- KONFIGURASI & STATE GLOBAL PASIEN ---
 let REGISTERED_PATIENT = { 
     name: "Budi Santoso", 
@@ -620,7 +623,7 @@ async function fetchAIPrediction() {
     while (signalData.length < 100) signalData.push(Math.random());
 
     try {
-        const response = await fetch('https://pope-clubbing-unbeaten.ngrok-free.dev/predict', {
+        const response = await fetch(`${API_BASE_URL}/predict`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
